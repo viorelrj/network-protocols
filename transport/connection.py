@@ -1,4 +1,4 @@
-from packet import encode_packet, decode_packet, null_packet, encode_data
+from transport.packet import encode_packet, decode_packet, null_packet, encode_data
 from socket import socket, AF_INET, SOCK_DGRAM, SOL_SOCKET, SO_REUSEADDR
 
 class Connection:
@@ -48,10 +48,11 @@ class Connection:
         fin = None
         response = {}
         counter = 0
+        addr = None
         while (not response or response['syn'] != self.__ack):
             try:
                 packet_r, addr = self.__core.recvfrom(self.__buffsize)
-                response = decode_packet(packet_r)=
+                response = decode_packet(packet_r)
                 if 'fin' in response:
                     fin = response['fin']
                     ack = self.__ack + 1
@@ -76,6 +77,12 @@ class Connection:
 
         self.__ack += response['data_len'] or 1
         return response['data']
+
+    def subscribe(self):
+        response = self.receive_packet()
+        while response != None:
+            yield response
+            response = self.receive_packet()
 
     def close(self):
         packet = encode_packet(

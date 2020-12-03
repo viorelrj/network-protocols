@@ -24,4 +24,4 @@ def null_packet():
     return json.dumps("{}").encode(encoding)
 
 def encode_data(data):
-    return str(data)
+    return str(data).encode(encoding)
