@@ -26,11 +26,19 @@ class FTPServer:
     def run(self):
         self.__running = True
         while self.__running:
-            connection = self.__core.accept_connection(100)
+            print('listening for new connections')
+            connection = self.__core.accept_connection(500)
             control = self.__get_port()
             data = self.__get_port()
             connection.send_packet(str(control) + ' ' + str(data))
             connection.close()
+            self.manage(control, data)
+
+    def manage(self, control, data):
+        print('connected')
+        control_connection = Transport(self.__ip, control).accept_connection(100)
+        data_connection = Transport().connect(self.__ip, data)
+
 
     def close(self):
         self.__running = False

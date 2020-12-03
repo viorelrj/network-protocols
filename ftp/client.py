@@ -8,5 +8,7 @@ class FTPClient:
 
     def request_connection(self, ip):
         connection = self.__core.connect(ip, 5000)
+        res = ''
         for msg in connection.subscribe():
-            print(msg)
+            res += msg
+        return res.split(' ')
