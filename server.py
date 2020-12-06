@@ -14,4 +14,6 @@ counter = 1237
 for wrapped_socket in listener.run():
     wrapped_socket.accept_connections()
     message = wrapped_socket.recvfrom_noblock()
-    print(message)
+
+    if (message):
+        wrapped_socket.send('confirmed')
