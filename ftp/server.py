@@ -35,7 +35,6 @@ class FTPServer:
             self.manage(control, data)
 
     def manage(self, control, data):
-        print('connected')
         control_connection = Transport(self.__ip, control).accept_connection(100)
         data_connection = Transport().connect(self.__ip, data)
 

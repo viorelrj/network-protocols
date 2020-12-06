@@ -1,9 +1,11 @@
-# from ftp.client import FTPClient
+from transport.socket_wrapper import SocketWrapper
 
-# client = FTPClient()
-# [control, data] = client.request_connection('127.0.0.1')
+from transport.transport import Transport
 
-import socket
+socket = SocketWrapper()
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.sendto(b'1234', ('127.0.0.1', 1234))
+socket.connect('127.0.0.1', 1234)
+socket.send('Hennlo')
+socket.send('How ar yu')
+socket.send('Can I has bred?')
+socket.close()

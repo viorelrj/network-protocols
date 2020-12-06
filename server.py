@@ -9,4 +9,9 @@ sock1 = SocketWrapper()
 sock1.bind('127.0.0.1', 1234)
 listener.add_socket(sock1)
 
-listener.run()
+counter = 1237
+
+for wrapped_socket in listener.run():
+    wrapped_socket.accept_connections()
+    message = wrapped_socket.recvfrom_noblock()
+    print(message)
