@@ -7,8 +7,9 @@ class SocketWrapper:
     __core = None
     __ip = None
     __port = None
-    __buff = 1024
+    __buff = 4096
     __connection = None
+    __cached_message = None
 
     def __init__(self):
         self.__core = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -29,22 +30,33 @@ class SocketWrapper:
     def sendto(self, message, addr):
         self.__core.sendto(message, addr)
 
+    def cache_message(self, message):
+        self.__cached_message = message
+
+    def send_cached_ifany(self):
+        if (self.__cached_message != None):
+            self.send(self.__cached_message)
+            self.__cached_message = None
+
     def send(self, message):
         return self.__connection.send(message)
 
     def settimeout(self, timeout):
         self.__core.settimeout(timeout)
 
+    def setblocking(self, val):
+        self.__core.setblocking(val)
+
     def recvfrom(self):
-        return self.__handle_recvfrom()
+        return self._handle_recvfrom()
 
     def recvfrom_noblock(self):
         self.__core.setblocking(False)
-        result = self.__handle_recvfrom()
+        result = self._handle_recvfrom()
         self.__core.setblocking(True)
         return result
 
-    def __handle_recvfrom(self):
+    def _handle_recvfrom(self):
         if self.__connection.is_conected():
             return self.__connection.read_connection()
         else:

@@ -84,7 +84,6 @@ class Connection:
 
         tries = 0
         response = {}
-        print('closing')
         while not response or not 'fin' in response or response['ack'] != self.__syn:
             self.__core.sendto(pack, self.__addr)
             tries += 1
