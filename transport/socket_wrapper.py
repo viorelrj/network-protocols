@@ -11,6 +11,9 @@ class SocketWrapper:
     __connection = None
     __cached_message = None
 
+    def get_type(self):
+        return 'sock'
+
     def __init__(self):
         self.__core = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -18,7 +21,7 @@ class SocketWrapper:
         return self.__core
     
     def get_hash(self):
-        return str(self.__core.getsockname())
+        return self.get_type() + '_' + str(self.__core.getsockname())
 
     # What if binds twice?
     def bind(self, ip, port, buff=1024):
@@ -49,6 +52,9 @@ class SocketWrapper:
 
     def recvfrom(self):
         return self._handle_recvfrom()
+
+    def fileno(self):
+        return self.__core.fileno()
 
     def recvfrom_noblock(self):
         self.__core.setblocking(False)

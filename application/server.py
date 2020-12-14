@@ -1,7 +1,7 @@
 
 from transport.socket_listener import SocketListener
 from transport.transport import SocketWrapper
-import sys.stdin as stdin
+import sys
 
 class FTPServer:
     __ip = None
@@ -20,15 +20,19 @@ class FTPServer:
         self.__core_socket.bind(self.__ip, self.__port)
         self.__listener.add_socket(self.__core)
 
-        for wrapped_socket in self.__listener.run():
-            wrapped_socket.accept_connection()
+        for descriptor in self.__listener.run():
+            if descriptor.fileno() == sys.stdin.fileno():
+                val = sys.stdin.readline()
+                print('Received', val)
+            else:
+                descriptor.accept_connection()
 
-            if self.__listener.get_state() == 'read':
-                message = wrapped_socket.recvfrom_noblock()
+                if self.__listener.get_state() == 'read':
+                    message = descriptor.recvfrom_noblock()
 
-                if (message != None):
-                    print(message)
-                    wrapped_socket.cache_message('Hello there')
+                    if (message != None):
+                        print(message)
+                        descriptor.cache_message('Hello there')
 
-            if listener.get_state() == 'write':
-                wrapped_socket.send_cached_ifany()
+                if listener.get_state() == 'write':
+                    descriptor.send_cached_ifany()
