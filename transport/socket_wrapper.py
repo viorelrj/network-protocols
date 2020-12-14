@@ -11,6 +11,9 @@ class SocketWrapper:
     __connection = None
     __cached_message = None
 
+    def is_connected(self):
+        return self.__connection.is_conected()
+
     def get_type(self):
         return 'sock'
 

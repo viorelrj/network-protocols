@@ -1,10 +1,5 @@
 from transport.socket_wrapper import SocketWrapper
+from application.client import FTPClient
 
-
-socket = SocketWrapper()
-
-socket.connect('127.0.0.1', 1234)
-socket.send('Hennlo')
-# message = socket.recvfrom()
-# print(message)
-socket.close()
+client = FTPClient()
+client.connect('127.0.0.1', 1234)
