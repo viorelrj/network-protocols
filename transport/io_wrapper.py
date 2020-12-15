@@ -6,8 +6,11 @@ class IOWrapper:
     def get_type(self):
         return 'io'
 
-    def __init__(self, core):
-        self.__core = core
+    def __init__(self):
+        self.__core = sys.stdin
+
+    def read(self):
+        return self.__core.readline()
 
     def get_core(self):
         return self.__core

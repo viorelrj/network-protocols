@@ -4,12 +4,18 @@ from transport.io_wrapper import IOWrapper
 from transport.socket_wrapper import SocketWrapper
 import random
 
+def handle_control(socket_wrapper, action):
+    socket_wrapper.accept_connections()
+
+    if action == 'read':
+        message = socket_wrapper.recvfrom_noblock()
+
 class FTPServer:
+    __core_socket = None
     __ip = None
     __main_port = None
     __ephemeral_ports = [49152, 65535]
     __listener = None
-    __core_socket = None
     __ports = []
 
     def get_ephemeral_port(self):
@@ -21,15 +27,32 @@ class FTPServer:
             return rand
 
     def __create_connection(self):
-        control = self.get_ephemeral_port()
-        data = self.get_ephemeral_port()
+        control_port = self.get_ephemeral_port()
+        data_port = self.get_ephemeral_port()
+        control_sock = SocketWrapper()
+        control_sock.bind(self.__ip, control_port)
+        control_sock.set_response(handle_control)
+        data_sock = SocketWrapper()
 
-        return str(control) + ' ' + str(data)
+
+        self.__listener.add_descriptor(control_sock)
+        self.__listener.add_descriptor(data_sock)
+
+        return str(control_port) + ' ' + str(data_port)
 
     def __init__(self, ip, port):
         self.__listener = DescriptorListener()
         self.__ip = ip
         self.__main_port = port
+
+    def __handle_core(self, sock_wrapper, action):
+        sock_wrapper.accept_connections()
+        if self.__listener.get_state() == 'read':
+            message = sock_wrapper.recvfrom_noblock()
+
+            if (sock_wrapper == self.__core_socket and sock_wrapper.is_connected()):
+                sock_wrapper.send(self.__create_connection())
+
 
     def run(self):
         self.__core_socket = SocketWrapper()
@@ -40,12 +63,8 @@ class FTPServer:
             if (descriptor == None):
                 continue
 
-            descriptor.accept_connections()
-            if self.__listener.get_state() == 'read':
-                message = descriptor.recvfrom_noblock()
+            if (descriptor != self.__core_socket):
+                descriptor.response(self.__listener.get_state())
+                continue
 
-                if (descriptor == self.__core_socket and descriptor.is_connected()):
-                    descriptor.send(self.__create_connection())
-
-            if self.__listener.get_state() == 'write':
-                descriptor.send_cached_ifany()
+            self.__handle_core(descriptor, self.__listener.get_state())

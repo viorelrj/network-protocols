@@ -10,6 +10,14 @@ class SocketWrapper:
     __buff = 4096
     __connection = None
     __cached_message = None
+    __response = None
+
+    def set_response(self, response):
+        self.__response = response
+
+    def response(self, action):
+        if (self.__response != None):
+            self.__response(self, action)
 
     def is_connected(self):
         return self.__connection.is_conected()
