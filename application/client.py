@@ -1,6 +1,8 @@
 from transport.socket_wrapper import SocketWrapper
 from transport.descriptor_listener import DescriptorListener
 from transport.io_wrapper import IOWrapper
+from application.cli import FTPCLI
+import os
 
 class FTPClient:
     __core = None
@@ -15,6 +17,9 @@ class FTPClient:
         self.__control_sock = SocketWrapper()
         self.__listener = DescriptorListener()
         self.__io_wraper = IOWrapper()
+
+    def __handle_command(self, command):
+        pass
     
     def connect(self, ip, port):
         self.__core.connect(ip, port)
@@ -36,12 +41,16 @@ class FTPClient:
             
             if self.__listener.get_state()  == 'read':
                 if descriptor.get_type() == 'sock':
-                    pass
+                    print(descriptor.recvfrom())
 
                 if descriptor.get_type() == 'io':
-                    result = descriptor.read().strip()
-                    pass
+                    io_input = descriptor.read().strip()
 
+                    if not FTPCLI.validate(io_input):
+                        print('Invalid input')
+                        continue
+                    
+                    self.__control_sock.send(io_input)
 
 
 

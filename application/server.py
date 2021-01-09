@@ -2,13 +2,8 @@
 from transport.descriptor_listener import DescriptorListener
 from transport.io_wrapper import IOWrapper
 from transport.socket_wrapper import SocketWrapper
+from application.server_connection import FTPServerConnection
 import random
-
-def handle_control(socket_wrapper, action):
-    socket_wrapper.accept_connections()
-
-    if action == 'read':
-        message = socket_wrapper.recvfrom_noblock()
 
 class FTPServer:
     __core_socket = None
@@ -17,6 +12,7 @@ class FTPServer:
     __ephemeral_ports = [49152, 65535]
     __listener = None
     __ports = []
+    
 
     def get_ephemeral_port(self):
         rand = random.randint(self.__ephemeral_ports[0], self.__ephemeral_ports[1])
@@ -29,14 +25,12 @@ class FTPServer:
     def __create_connection(self):
         control_port = self.get_ephemeral_port()
         data_port = self.get_ephemeral_port()
-        control_sock = SocketWrapper()
-        control_sock.bind(self.__ip, control_port)
-        control_sock.set_response(handle_control)
-        data_sock = SocketWrapper()
 
+        connection = FTPServerConnection(self.__ip, control_port, data_port)
+        connection_sockets = connection.get_sockets()
 
-        self.__listener.add_descriptor(control_sock)
-        self.__listener.add_descriptor(data_sock)
+        for sock in connection_sockets:
+            self.__listener.add_descriptor(sock)
 
         return str(control_port) + ' ' + str(data_port)
 
